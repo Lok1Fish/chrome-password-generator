@@ -2,20 +2,30 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <!-- Подключаем SVG-иконки для красивых кнопок в истории -->
+  <link rel="stylesheet" href="https://cloudflare.com">
   <style>
-    body { width: 320px; font-family: Arial, sans-serif; padding: 12px; margin: 0; box-sizing: border-box; }
-    input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 8px; text-align: center; font-weight: bold; font-size: 14px; }
+    body { width: 340px; font-family: Arial, sans-serif; padding: 12px; margin: 0; box-sizing: border-box; }
+    input[type="text"] { width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 6px; text-align: center; font-weight: bold; font-size: 14px; }
+    
+    /* Стили для индикатора сложности пароля */
+    .strength-meter { margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .strength-bar { height: 4px; width: 0%; background: #dc3545; border-radius: 2px; transition: all 0.3s ease; }
+    .strength-text { font-size: 11px; color: #666; font-weight: bold; text-align: left; min-height: 14px; }
+
     .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; }
     
     /* Кнопка режима госсервисов */
     .gov-mode-container { margin-bottom: 10px; }
-    .btn-gov { background: #0c4a60; font-size: 12px; padding: 6px; margin-bottom: 8px; transition: background 0.2s; }
+    .btn-gov { width: 100%; padding: 8px; background: #0c4a60; font-size: 12px; margin-bottom: 8px; transition: background 0.2s; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
     .btn-gov.active { background: #10b981; box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
 
     /* Стили для чекбоксов */
-    .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; font-size: 12px; }
+    .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; font-size: 12px; }
     .checkbox-group label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
     .checkbox-group.disabled { opacity: 0.5; pointer-events: none; }
+    
+    .single-checkbox { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px; color: #4a5568; }
 
     button { width: 100%; padding: 8px; margin-bottom: 6px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; }
     button:hover { background: #0056b3; }
@@ -27,34 +37,49 @@
     .clear-history { font-size: 11px; background: none; color: #dc3545; border: none; padding: 0; margin: 0; width: auto; cursor: pointer; font-weight: normal; }
     .clear-history:hover { text-decoration: underline; background: none; }
     .history-container { max-height: 140px; overflow-y: auto; font-size: 11px; background: #f8f9fa; border: 1px solid #e2e8f0; padding: 4px; border-radius: 4px; }
+    
+    /* Элемент истории с кнопками */
     .history-item { padding: 6px; border-bottom: 1px solid #edf2f7; word-break: break-all; display: flex; justify-content: space-between; align-items: center; }
     .history-item:last-child { border-bottom: none; }
-    .history-info { flex-grow: 1; margin-right: 8px; }
-    .meta { color: #666; font-size: 10px; }
-    .btn-mini-copy { width: auto; font-size: 10px; padding: 2px 6px; margin: 0; background: #6c757d; }
-    .btn-mini-copy:hover { background: #5a6268; }
+    .history-info { flex-grow: 1; margin-right: 8px; display: flex; flex-direction: column; }
+    .password-text { font-family: monospace; font-size: 12px; }
+    .meta { color: #666; font-size: 10px; margin-top: 2px; }
+    
+    .actions-group { display: flex; gap: 4px; }
+    .btn-action { width: 30px; height: 24px; padding: 0; margin: 0; background: #6c757d; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px; color: white; border: none; cursor: pointer; }
+    .btn-action:hover { background: #5a6268; }
+    .btn-copy-mini { background: #28a745; }
+    .btn-copy-mini:hover { background: #218838; }
   </style>
 </head>
 <body>
   <input type="text" id="passwordResult" readonly placeholder="Здесь будет пароль">
   
+  <!-- Блок визуального индикатора сложности -->
+  <div class="strength-meter">
+    <div id="strengthBar" class="strength-bar"></div>
+    <span id="strengthText" class="strength-text"></span>
+  </div>
+
   <div class="row">
     <label for="length">Длина: <span id="lenVal">12</span></label>
     <input type="range" id="length" min="6" max="30" value="12">
   </div>
 
-  <!-- Кнопка режима Госсервисов -->
   <div class="gov-mode-container">
     <button id="btnGovMode" class="btn-gov">🇷🇺 Режим: Для госсервисов (ВЫКЛ)</button>
   </div>
 
-  <!-- Настройки состава пароля -->
   <div class="checkbox-group" id="checkboxGroup">
     <label><input type="checkbox" id="chkLowercase" checked> abc (строчные)</label>
     <label><input type="checkbox" id="chkUppercase" checked> ABC (прописные)</label>
     <label><input type="checkbox" id="chkNumbers" checked> 123 (цифры)</label>
     <label><input type="checkbox" id="chkSymbols" checked> спецсимволы</label>
   </div>
+
+  <label class="single-checkbox">
+    <input type="checkbox" id="chkExcludeSimilar"> Исключить похожие (1, l, I, 0, O)
+  </label>
 
   <button id="generate">Сгенерировать</button>
   <button id="copy" class="btn-copy">Копировать</button>
