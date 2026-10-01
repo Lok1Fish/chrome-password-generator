@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Генератор паролей с историей",
+  "version": "1.1",
+  "description": "Создает надежные пароли и сохраняет их историю с привязкой к сайту",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ]
+}
